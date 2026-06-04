@@ -1,0 +1,22 @@
+name = "omg-lol-admin"
+compatibility_date = "2024-01-01"
+pages_build_output_dir = "public"
+
+# Variável pública (não sensível). Pode ficar versionada.
+[vars]
+OMG_ADDRESS = "tucas"
+
+# Os secrets NÃO ficam aqui. Defina-os via dashboard do Cloudflare Pages
+# (Settings → Environment variables → Encrypt) ou via CLI:
+#
+#   wrangler pages secret put OMG_API_KEY
+#   wrangler pages secret put ADMIN_PASSWORD
+#   wrangler pages secret put SESSION_SECRET
+#
+# Para desenvolvimento local (wrangler pages dev), crie um arquivo .dev.vars
+# (já no .gitignore) com:
+#
+#   OMG_API_KEY="..."
+#   ADMIN_PASSWORD="..."
+#   SESSION_SECRET="..."
+#   OMG_ADDRESS="tucas"
