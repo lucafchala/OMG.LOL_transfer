@@ -1,3 +1,10 @@
+# TODO
+- continue homepage tools update on claude chat
+- find a way to sincronize homepage and url. redirects and html
+
+
+
+
 # lucafchala — Migration Hub
 
 This repo is the central reference for migrating **Luca F. Chala's** personal web presence off [omg.lol](https://omg.lol) and onto self-hosted [Cloudflare Pages](https://pages.cloudflare.com) projects.
@@ -79,7 +86,7 @@ Ordered by priority. **Start a fresh Claude Code session for each one** — read
   - Cloudflare Pages: no build, root output
   - DNS: add `dash.lucafchala.com` CNAME → Pages project URL
 
-- [ ] **`url.lucafchala.com`** — Mirror PURL domain (optional)
+- [x] **`url.lucafchala.com`** — Mirror PURL domain (optional)
   - New repo: `lucafchala/url.lucafchala.com`
   - Output in `output/url.lucafchala.com/` — just `_redirects`, same rules as `lucafchala.com`
   - Cloudflare Pages: no build, root output
@@ -97,7 +104,7 @@ Ordered by priority. **Start a fresh Claude Code session for each one** — read
   - DNS: update `now.lucafchala.com` CNAME → Pages project URL
   - Fix in content: remove the `[Back to my omg.lol page!](https://tucas.omg.lol)` link at the bottom
 
-- [ ] **`paste.lucafchala.com`** — Pastes / text snippets
+- [x] **`paste.lucafchala.com`** — Pastes / text snippets
   - New repo: `lucafchala/paste.lucafchala.com`
   - Source: `content/pastes/`
   - All 5 committed pastes are worth publishing; drop nothing
