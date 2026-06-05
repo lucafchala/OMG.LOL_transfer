@@ -421,6 +421,12 @@ body {
   border-color: var(--accent-dim);
 }
 
+.inline-edit-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+}
 .inline-edit {
   background: var(--bg);
   border: 1px solid var(--accent);
@@ -428,8 +434,29 @@ body {
   font-family: var(--mono);
   font-size: 13px;
   padding: 4px 6px;
-  width: 100%;
+  flex: 1;
+  min-width: 0;
+  outline: none;
 }
+.inline-ok,
+.inline-x {
+  background: none;
+  border: 1px solid var(--border-strong);
+  color: var(--text-dim);
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.inline-ok:hover  { color: var(--accent);  border-color: var(--accent-dim); }
+.inline-x:hover   { color: var(--danger);  border-color: var(--danger); }
 
 .confirm {
   display: inline-flex;
@@ -497,9 +524,19 @@ body {
   letter-spacing: 0.04em;
 }
 
+/* ---------- global touch polish ---------- */
+
+button,
+[role="button"],
+label.toggle {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* ---------- responsive (mobile / tablet) ---------- */
 
 @media (max-width: 720px) {
+  /* --- shell --- */
   .app {
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr;
@@ -511,13 +548,17 @@ body {
     border-bottom: 1px solid var(--border);
     padding: 0;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
   .brand {
     border-bottom: none;
     border-right: 1px solid var(--border);
     margin: 0;
-    padding: 14px 14px;
+    padding: 0 14px;
     white-space: nowrap;
+    height: 48px;
+    display: flex;
+    align-items: center;
   }
   .nav {
     display: flex;
@@ -527,6 +568,9 @@ body {
     border-left: none;
     border-bottom: 2px solid transparent;
     white-space: nowrap;
+    min-height: 48px;
+    padding: 0 16px;
+    justify-content: center;
   }
   .nav-item.active {
     border-left-color: transparent;
@@ -535,20 +579,66 @@ body {
   .nav-logout {
     border-top: none;
     margin: 0;
+    border-left: 1px solid var(--border);
   }
-  .nav-label {
-    display: none;
-  }
-  .nav-logout .nav-label {
-    display: none;
-  }
+  .nav-label { display: none; }
+  .nav-icon  { width: auto; font-size: 18px; }
+
+  /* --- main area --- */
   .main {
-    padding: 16px;
+    padding: 14px 14px 60px;
+    overflow-x: hidden;
   }
-  .web-grid {
-    grid-template-columns: 1fr;
+
+  /* --- touch targets --- */
+  .btn       { min-height: 44px; }
+  .btn-sm    { min-height: 40px; }
+  .icon-btn  { width: 40px; height: 40px; font-size: 17px; }
+  .inline-ok,
+  .inline-x  { width: 36px; height: 36px; font-size: 15px; }
+
+  /* --- iOS input-zoom fix (triggers when font-size < 16px) --- */
+  .input,
+  .textarea,
+  .inline-edit { font-size: 16px; }
+
+  /* --- section head wraps instead of overflowing --- */
+  .section-head {
+    flex-wrap: wrap;
+    row-gap: 10px;
   }
-  .web-pane {
-    min-height: 44vh;
+  .section-title { font-size: 17px; }
+
+  /* --- list rows: actions drop below content --- */
+  .row {
+    flex-wrap: wrap;
+    gap: 0;
+    padding: 12px 12px 10px;
   }
+  .row-main { width: 100%; }
+  .row-actions {
+    width: 100%;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    margin-top: 8px;
+  }
+
+  /* --- form fields stack vertically --- */
+  .form-row {
+    flex-direction: column;
+    gap: 14px;
+  }
+  .form-row .grow,
+  .form-row > div,
+  .form-row > label { width: 100%; }
+
+  /* --- homepage: editor on top, preview below --- */
+  .web-grid   { grid-template-columns: 1fr; }
+  .web-pane   { min-height: 42vh; }
+
+  /* --- login box fills more of the screen --- */
+  .login-box { width: 100%; max-width: 380px; }
 }

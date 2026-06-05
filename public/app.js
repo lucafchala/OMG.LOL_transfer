@@ -512,7 +512,7 @@ async function renderPastes() {
   async function pasteForm(existing) {
     container.innerHTML = "";
     const isEdit = !!existing;
-    const titleInput = h("input", { class: "input", placeholder: "título", spellcheck: "false" });
+    const titleInput = h("input", { class: "input", placeholder: "título", spellcheck: "false", autocapitalize: "none", autocorrect: "off" });
     titleInput.value = existing?.title || "";
     if (isEdit) titleInput.setAttribute("readonly", "");
     const listedToggle = h("input", { type: "checkbox" });
@@ -604,12 +604,22 @@ async function renderPurls() {
     const urlEl = h("div", { class: "row-sub", title: "clique para editar", style: "cursor:text" }, p.url);
     // Edição inline da URL de destino.
     urlEl.addEventListener("click", () => {
-      const input = h("input", { class: "inline-edit" });
+      const input = h("input", {
+        class: "inline-edit",
+        autocapitalize: "none",
+        autocorrect: "off",
+        spellcheck: "false",
+        type: "url",
+      });
       input.value = p.url;
-      urlEl.replaceWith(input);
+      const okBtn = h("button", { class: "inline-ok", type: "button", title: "Confirmar (Enter)" }, "✓");
+      const xBtn  = h("button", { class: "inline-x",  type: "button", title: "Cancelar (Esc)"   }, "✗");
+      const wrap  = h("div",    { class: "inline-edit-wrap" }, input, okBtn, xBtn);
+      urlEl.replaceWith(wrap);
       input.focus();
       input.select();
-      const cancel = () => input.replaceWith(urlEl);
+
+      const cancel = () => wrap.replaceWith(urlEl);
       const commit = async () => {
         const newUrl = input.value.trim();
         if (!newUrl || newUrl === p.url) return cancel();
@@ -622,11 +632,15 @@ async function renderPurls() {
           alertRow(row, err.message);
         }
       };
+      // keyboard shortcuts work everywhere
       input.addEventListener("keydown", (e) => {
         if (e.key === "Enter") commit();
         else if (e.key === "Escape") cancel();
       });
-      input.addEventListener("blur", cancel);
+      // explicit buttons work on touch (no blur-cancel so tapping a button doesn't
+      // accidentally discard the edit before the click fires)
+      okBtn.addEventListener("click", commit);
+      xBtn.addEventListener("click",  cancel);
     });
 
     const actions = h("div", { class: "row-actions" });
@@ -673,8 +687,8 @@ async function renderPurls() {
 
   async function purlForm() {
     container.innerHTML = "";
-    const nameInput = h("input", { class: "input", placeholder: "nome (ex.: gh)", spellcheck: "false" });
-    const urlInput = h("input", { class: "input", placeholder: "https://destino…", spellcheck: "false" });
+    const nameInput = h("input", { class: "input", placeholder: "nome (ex.: gh)", spellcheck: "false", autocapitalize: "none", autocorrect: "off" });
+    const urlInput  = h("input", { class: "input", placeholder: "https://destino…", spellcheck: "false", autocapitalize: "none", autocorrect: "off", type: "url" });
     const listedToggle = h("input", { type: "checkbox" });
     const errEl = h("div", { class: "field-error" });
     const saveSpin = h("span", { class: "spinner hidden" });
