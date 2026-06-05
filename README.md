@@ -51,9 +51,10 @@ wrangler pages secret put ADMIN_PASSWORD
 wrangler pages secret put SESSION_SECRET
 ```
 
-> Se o `OMG_ADDRESS` for diferente de `tucas`, atualize também a constante
-> `ADDRESS` no topo de `public/app.js` (usada apenas para montar as URLs
-> públicas de paste/PURL exibidas nos botões "copiar url").
+> As URLs públicas exibidas nos botões "copiar url" são montadas a partir de
+> duas constantes no topo de `public/app.js`: `ADDRESS` (`tucas`, usada nos
+> pastes → `tucas.paste.lol/...`) e `SITE_DOMAIN` (`lucafchala.com`, usada nos
+> PURLs → `lucafchala.com/...`). Ajuste-as se mudar de endereço/domínio.
 
 ## Deploy
 
@@ -78,6 +79,35 @@ Para exercitar a UI sem Cloudflare nem omg.lol, abra a app com `?mock=1`
 servir fixtures em memória para web/pastes/purls e um login falso — útil para
 testar layout e interações. Um selo **MOCK** aparece no cabeçalho. O mock é
 ignorado em produção (sem o parâmetro/flag).
+
+## Editar com o Claude Code (MCP)
+
+Além do painel web, dá para gerenciar o omg.lol direto de uma sessão do
+**Claude Code** — sem precisar de API key da Anthropic, usando a sua assinatura
+existente. O repo inclui um **MCP server** sem dependências (`mcp/omglol-server.mjs`)
+que expõe a API do omg.lol como ferramentas.
+
+Ele já está registrado em `.mcp.json` (escopo do projeto). Para usar:
+
+1. Exporte sua API key do omg.lol no ambiente onde o Claude Code roda:
+   ```sh
+   export OMG_API_KEY="sua-api-key-do-omg-lol"
+   ```
+   (O `.mcp.json` expande `${OMG_API_KEY}` — a chave nunca é versionada.)
+2. Abra o Claude Code neste repositório e aprove o servidor MCP `omglol` quando
+   for solicitado (`/mcp` lista o status).
+3. Peça em linguagem natural, ex.: *"mostre minha homepage atual e adicione uma
+   seção de projetos"* ou *"crie um PURL `gh` apontando para o meu GitHub"*.
+
+Requer **Node 18+** (usa `fetch` nativo). Ferramentas disponíveis:
+
+| Ferramenta | Ação |
+|------------|------|
+| `get_homepage` / `set_homepage` | lê / substitui o HTML da homepage |
+| `list_pastes` / `get_paste` | lista / lê pastes |
+| `create_or_update_paste` / `delete_paste` | cria-atualiza / deleta paste |
+| `list_purls` | lista PURLs |
+| `create_or_update_purl` / `delete_purl` | cria-atualiza / deleta PURL |
 
 ## Testes
 
