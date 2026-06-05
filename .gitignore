@@ -4,6 +4,6 @@ node_modules/
 .DS_Store
 *.log
 
-# Backup exportado da API omg.lol — contém dados privados (DNS, email, conta).
-# Nunca versionar.
+# Raw API export dump — contains private data (email config, account IDs).
+# Content worth keeping has been moved to content/.
 omg-export/
