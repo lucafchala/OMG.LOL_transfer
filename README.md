@@ -1,6 +1,8 @@
 # TODO
 - continue homepage tools update on claude chat
 - find a way to sincronize homepage and url. redirects and html
+- phase out url.
+- ask claude to update this readme and create a simple todo like this
 
 
 
