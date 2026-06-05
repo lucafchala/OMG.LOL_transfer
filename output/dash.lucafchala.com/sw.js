@@ -1,4 +1,4 @@
-const CACHE = 'painel-v1';
+const CACHE = 'dash-v1';
 const PRECACHE = ['/', '/index.html', '/data.json', '/manifest.json', '/icon.svg'];
 
 self.addEventListener('install', e => {
@@ -15,10 +15,9 @@ self.addEventListener('activate', e => {
     self.clients.claim();
 });
 
-/* Stale-while-revalidate: return cache immediately, update in background */
+/* Stale-while-revalidate */
 self.addEventListener('fetch', e => {
     if (e.request.method !== 'GET') return;
-
     e.respondWith(
         caches.open(CACHE).then(cache =>
             cache.match(e.request).then(cached => {
