@@ -7,8 +7,9 @@
 // ============================================================
 
 const ADDRESS = "tucas"; // espelha OMG_ADDRESS; usado só para montar URLs públicas
+const SITE_DOMAIN = "lucafchala.com"; // domínio custom onde os PURLs resolvem
 const PASTE_URL = (title) => `https://${ADDRESS}.paste.lol/${encodeURIComponent(title)}`;
-const PURL_URL = (name) => `https://${ADDRESS}.url.lol/${encodeURIComponent(name)}`;
+const PURL_URL = (name) => `https://${SITE_DOMAIN}/${encodeURIComponent(name)}`;
 
 // Mock mode: ?mock=1 na URL, ou localStorage 'omgadmin_mock' === '1'.
 const MOCK =
@@ -216,7 +217,7 @@ function loadCM() {
 }
 
 // Cria um editor dentro de `host`. Retorna { getValue, setValue, focus }.
-async function createEditor(host, { doc = "", language = null, onChange = () => {} } = {}) {
+async function createEditor(host, { doc = "", language = null, onChange = () => {}, wrap = false } = {}) {
   host.innerHTML = "";
   const cm = await loadCM();
 
@@ -228,6 +229,7 @@ async function createEditor(host, { doc = "", language = null, onChange = () => 
         if (v.docChanged) onChange(view.state.doc.toString());
       }),
     ];
+    if (wrap) extensions.push(cm.EditorView.lineWrapping);
     if (language === "html") extensions.push(cm.html());
     const view = new cm.EditorView({ doc, extensions, parent: host });
     return {
@@ -238,7 +240,7 @@ async function createEditor(host, { doc = "", language = null, onChange = () => 
   }
 
   // Fallback
-  const ta = h("textarea", { class: "textarea", spellcheck: "false" });
+  const ta = h("textarea", { class: "textarea", spellcheck: "false", wrap: wrap ? "soft" : "off" });
   ta.value = doc;
   ta.addEventListener("input", () => onChange(ta.value));
   host.append(ta);
@@ -354,21 +356,39 @@ async function renderWeb() {
     h("span", { class: "btn-label" }, "salvar"),
     h("span", { class: "spinner hidden" }),
   );
-  const { head, titleEl } = sectionHead("Homepage", [
-    status,
-    refreshButton(() => renderWeb.forceReload()),
-    saveBtn,
-  ]);
-  main.append(head);
-
   const editorHost = h("div", { class: "editor-host" });
   const iframe = h("iframe", { sandbox: "allow-same-origin", title: "preview" });
   const grid = h(
     "div",
     { class: "web-grid" },
-    h("div", { class: "web-pane" }, h("div", { class: "pane-label" }, "HTML"), editorHost),
-    h("div", { class: "web-pane" }, h("div", { class: "pane-label" }, "preview"), h("div", { class: "preview" }, iframe)),
+    h("div", { class: "web-pane pane-code" }, h("div", { class: "pane-label" }, "HTML"), editorHost),
+    h("div", { class: "web-pane pane-preview" }, h("div", { class: "pane-label" }, "preview"), h("div", { class: "preview" }, iframe)),
   );
+
+  // Controle de visualização: split (PC) / code / preview (tab única, ótimo no telefone).
+  const VIEW_KEY = "omgadmin_webview";
+  const views = ["split", "code", "preview"];
+  let view = localStorage.getItem(VIEW_KEY);
+  if (!views.includes(view)) view = "split";
+  const seg = h("div", { class: "seg" });
+  function setView(v) {
+    view = v;
+    localStorage.setItem(VIEW_KEY, v);
+    grid.className = "web-grid view-" + v;
+    for (const b of seg.querySelectorAll(".seg-btn")) b.classList.toggle("active", b.dataset.view === v);
+  }
+  for (const v of views) {
+    seg.append(h("button", { class: "seg-btn", "data-view": v, onclick: () => setView(v) }, v));
+  }
+  setView(view);
+
+  const { head, titleEl } = sectionHead("Homepage", [
+    seg,
+    status,
+    refreshButton(() => renderWeb.forceReload()),
+    saveBtn,
+  ]);
+  main.append(head);
   const loading = h("div", { class: "loading" }, "carregando…");
   main.append(loading);
 
@@ -391,6 +411,7 @@ async function renderWeb() {
         editor = await createEditor(editorHost, {
           doc: saved,
           language: "html",
+          wrap: true,
           onChange: (val) => {
             setModified(val !== saved);
             updatePreview(val);
