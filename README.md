@@ -1,125 +1,250 @@
-# omg-lol-admin
+# lucafchala — Migration Hub
 
-Painel de administração pessoal para gerenciar o endereço **`tucas`** no
-[omg.lol](https://omg.lol) — edita a homepage, os pastes e os PURLs via API REST.
+This repo is the central reference for migrating **Luca F. Chala's** personal web presence off [omg.lol](https://omg.lol) and onto self-hosted [Cloudflare Pages](https://pages.cloudflare.com) projects.
 
-- **Frontend**: HTML + CSS + JS vanilla, single-page app, **sem build step**.
-- **Backend**: Cloudflare Pages Functions (`functions/api/*`) atuando como proxy autenticado.
-- A API key do omg.lol vive **apenas no Worker** (secret `OMG_API_KEY`); o navegador nunca a vê.
+**omg.lol subscription expired: 2026-06-06.** All data was exported before expiry. This repo documents what existed, what needs to be rebuilt, and tracks progress.
+
+---
+
+## Context
+
+The previous setup used omg.lol to host and route everything under `lucafchala.com`. Every subdomain was a CNAME pointing to `hosted.omg.lol`. When the subscription lapsed, all of it went dark simultaneously.
+
+**The replacement architecture:** one GitHub repo per subdomain → one Cloudflare Pages project per subdomain → custom domain via Cloudflare DNS. No databases, no servers, no frameworks. Static HTML + `_redirects` files where possible; Cloudflare Workers (Pages Functions) only where server-side logic is genuinely needed.
+
+**Owner:** Luca Ferriani Chala — `lucafchala.com` / `lfchala4@gmail.com`  
+**Primary devices:** Samsung S26 Ultra (mobile), tablets  
+**Languages:** Portuguese (pt-BR) primary, English secondary  
+
+---
+
+## Exported Data (in `omg-export/`)
+
+All content was exported from the omg.lol API on 2026-06-05, one day before expiry.
+
+| File | Contents |
+|---|---|
+| `omg-export/web/index.html` | Full homepage HTML (23KB) |
+| `omg-export/pastes/*.txt` | 14 pastes as individual text files |
+| `omg-export/pastebin.json` | Raw pastebin API response |
+| `omg-export/purls.json` | Raw PURLs API response (40 PURLs) |
+| `omg-export/_redirects` | PURLs converted to Cloudflare Pages `_redirects` format |
+| `omg-export/now.md` | /now page markdown |
+| `omg-export/weblog/` | 2 weblog posts as markdown |
+| `omg-export/statuses.json` | 5 old statuslog entries |
+| `omg-export/email.json` | Email forwarding: `tucas@omg.lol` → `lfchala4@gmail.com` |
+| `omg-export/switchboard.md` | Switchboard DNS config (documented, not content) |
+| `omg-export/info.json` | Account info, registration, PGP/SSH keys |
+
+> `omg-export/` is gitignored — the data lives only in your local clone.
+
+### PURLs summary
+- **40 total** — 23 active, 17 already broken (pointed to expired `paste.tucas.me` / `tucas.me`)
+- High-traffic active ones: `piauifut2024` (1135 hits), `instagram` (734), `signal` (533), `buymeacoffee` (510), `simplex` (898), `piauifut2025` (343)
+
+### Notable pastes
+- `camera-gear` — full photography gear list (most up-to-date version)
+- `proof-of-ownership` — PGP-signed domain ownership proof
+- `pgp` — public PGP key block
+- `vela_f5-2024`, `a-mascara`, `nirvana-*` — school video project pages (with Drive links)
+
+---
+
+## Migration Checklist
+
+Each item is one GitHub repo + one Cloudflare Pages project + one DNS update.
+Ordered by priority. **Start a fresh Claude Code session for each one** — read the "How to use" section below first.
+
+---
+
+### 🔴 Priority 1 — Site is completely dark without these
+
+- [ ] **`lucafchala.com`** — Main homepage
+  - New repo: `lucafchala/lucafchala.com`
+  - Source: `omg-export/web/index.html` as `index.html`
+  - Also add `omg-export/_redirects` as `_redirects` (handles `/instagram`, `/signal`, `/buymeacoffee`, etc.)
+  - Cloudflare Pages: no build command, output directory `/` (root)
+  - DNS: update `lucafchala.com` root record — change CNAME target from `hosted.omg.lol` to the Pages project URL
+  - Cleanup needed in the HTML before publishing:
+    - Remove the duplicate `<link rel="icon" href="https://tucas.omg.lol/favicon.ico">` near the top
+    - Update the `.services` section footer links (they point to omg.lol subdomains — update as each one gets rebuilt, or remove the section for now)
+
+- [ ] **`url.lucafchala.com`** — Short link redirects (PURLs)
+  - New repo: `lucafchala/url.lucafchala.com`
+  - Source: `omg-export/_redirects` — rename to `_redirects`, no other files needed
+  - Cloudflare Pages: no build, root output — Pages reads `_redirects` automatically
+  - DNS: update `url.lucafchala.com` CNAME → Pages project URL
+  - Note: `proof.lucafchala.com` was also a PURLs domain on omg.lol — point it here or redirect to `lucafchala.com`
+
+---
+
+### 🟡 Priority 2 — Linked from homepage, should exist soon
+
+- [ ] **`now.lucafchala.com`** — /now page
+  - New repo: `lucafchala/now.lucafchala.com`
+  - Source: `omg-export/now.md` — needs a simple HTML wrapper matching the homepage aesthetic
+  - Last updated: May 20, 2026 (still current content)
+  - DNS: update `now.lucafchala.com` CNAME → Pages project URL
+  - Fix in content: remove the `[Back to my omg.lol page!](https://tucas.omg.lol)` link at the bottom
+
+- [ ] **`paste.lucafchala.com`** — Pastes / text snippets
+  - New repo: `lucafchala/paste.lucafchala.com`
+  - Source: selected pastes from `omg-export/pastes/`
+  - Pastes worth keeping public: `camera-gear`, `proof-of-ownership`, `pgp`, school video pages (`vela_f5`, `a-mascara`, `nirvana-*`)
+  - Pastes to drop: `teste-api`, `teste-flipper-`, `pasta-bin`, `pix`, `sessionid`, `session-id`, `cloudspot_deprecation`
+  - Design: simple index page listing pastes + individual pages per paste, matching homepage aesthetic
+  - DNS: update `paste.lucafchala.com` CNAME → Pages project URL
+
+- [ ] **`proof.lucafchala.com`** — Ownership proof
+  - Simplest option: redirect `proof.lucafchala.com` → `paste.lucafchala.com/proof-of-ownership` once paste site is up
+  - Or: standalone one-page site serving the PGP-signed proof text
+  - Source: `omg-export/pastes/proof-of-ownership.txt`
+  - DNS: update `proof.lucafchala.com` CNAME → wherever it ends up
+
+---
+
+### 🟢 Priority 3 — Nice to have, not urgent
+
+- [ ] **`weblog.lucafchala.com`** — Blog
+  - New repo: `lucafchala/weblog.lucafchala.com`
+  - Source: `omg-export/weblog/photography_gear.md` and `chatgpt_should_not_have_been_released_.md`
+  - Only 2 posts — simple static HTML, index + one page per post
+  - Use `camera-gear` paste version for gear list (more up-to-date than the weblog post)
+  - DNS: update `weblog.lucafchala.com` CNAME → Pages project URL
+
+- [ ] **`log.lucafchala.com`** — Statuslog
+  - Only 5 old entries (2024), essentially unused
+  - Options: skip entirely and remove from homepage, or a simple status page
+  - If keeping: simplest is a static HTML page with the 5 entries hardcoded
+  - Source: `omg-export/statuses.json`
+
+- [ ] **`pictures.lucafchala.com`** — Photos
+  - The omg.lol account had zero pictures uploaded here
+  - Actual photos live at `fotos.lucafchala.com` (separate service, still active)
+  - Recommendation: redirect `pictures.lucafchala.com` → `fotos.lucafchala.com`, or remove DNS entry entirely
+
+- [ ] **`tildverse.lucafchala.com`** — Tildeverse
+  - Was an omg.lol community feature, no independent content
+  - Recommendation: redirect to `lucafchala.com` or remove DNS entry
+
+---
+
+### ⚙️ Ongoing / Infrastructure
+
+- [ ] **Homepage cleanup** (after subdomains are rebuilt)
+  - Replace `.services` section omg.lol links with links to new subdomains
+  - Verify `fotos.lucafchala.com` still works (photography link)
+  - Update footer: `proof.lucafchala.com` link, PGP/SSH key links (currently `home.omg.lol/keys/...` — these will 404)
+  - Consider adding a `favicon.svg` file to the homepage repo
+
+- [ ] **omg.lucafchala.com** — Admin panel (this repo, currently deployed)
+  - The proxy to omg.lol API is non-functional (omg.lol is gone)
+  - Decision: archive as-is, or repurpose as an admin panel for the new Cloudflare-hosted content
+  - If repurposed: backend would write to Cloudflare KV instead of calling omg.lol
+
+---
+
+## Architecture Reference
 
 ```
-Browser → Cloudflare Pages (público estático) → /api/* (Pages Function proxy) → api.omg.lol (Bearer)
+GitHub repo (lucafchala/<subdomain>)
+  └── index.html  (+  _redirects,  other assets)
+      │
+      │  push to main → auto-deploy
+      ▼
+Cloudflare Pages project
+  └── custom domain: <subdomain>.lucafchala.com
+      │
+      │  CNAME in Cloudflare DNS
+      ▼
+  lucafchala.com Cloudflare zone
 ```
 
-## Estrutura
+**Rules for all new repos:**
+- No build step — Cloudflare Pages serves files directly from root
+- No frameworks — vanilla HTML/CSS/JS only
+- No npm, no bundlers, no `package.json`
+- Match the design system below
+- Mobile-first (primary device: Samsung S26 Ultra)
 
-```
-public/            SPA estática (servida diretamente pelo Pages)
-  index.html       shell: sidebar + main + tela de login
-  style.css        todo o CSS (terminal/industrial)
-  app.js           router, fetch, cache, editor, mock mode
-functions/
-  _lib/auth.js     cookie de sessão assinado (HMAC-SHA256, Web Crypto)
-  _lib/omg.js      cliente da API omg.lol + helpers JSON
-  api/_middleware.js   exige sessão em todas as rotas /api/* (exceto login)
-  api/web.js           GET/POST  /api/web
-  api/pastes.js        GET/POST  /api/pastes
-  api/pastes/[title].js PUT/DELETE /api/pastes/:title
-  api/purls.js         GET/POST  /api/purls
-  api/purls/[name].js  PUT/DELETE /api/purls/:name
-  api/auth/login.js    POST /api/auth/login
-  api/auth/logout.js   POST /api/auth/logout
-test/auth.test.js  testes do cookie (node --test)
-wrangler.toml      config Cloudflare Pages
-```
+---
 
-## Variáveis de ambiente / secrets
+## Design System
 
-| Nome | Tipo | Descrição |
-|------|------|-----------|
-| `OMG_API_KEY` | secret | API key do omg.lol |
-| `ADMIN_PASSWORD` | secret | senha de acesso ao painel |
-| `SESSION_SECRET` | secret | string aleatória para assinar o cookie |
-| `OMG_ADDRESS` | var | endereço omg.lol (já definido como `tucas` no `wrangler.toml`) |
+Replicate these values across all pages for visual consistency:
 
-Defina os secrets no dashboard do Cloudflare Pages (Settings → Environment
-variables → **Encrypt**) ou via CLI:
-
-```sh
-wrangler pages secret put OMG_API_KEY
-wrangler pages secret put ADMIN_PASSWORD
-wrangler pages secret put SESSION_SECRET
+```css
+:root {
+  --bg:         #0d0c0a;
+  --border:     #252220;
+  --text:       #e6e1d6;
+  --muted:      #6a6358;
+  --accent:     #c08030;     /* amber gold */
+  --accent-dim: #6a4818;
+  --ctrl-bg:    #161412;
+}
 ```
 
-> As URLs públicas exibidas nos botões "copiar url" são montadas a partir de
-> duas constantes no topo de `public/app.js`: `ADDRESS` (`tucas`, usada nos
-> pastes → `tucas.paste.lol/...`) e `SITE_DOMAIN` (`lucafchala.com`, usada nos
-> PURLs → `lucafchala.com/...`). Ajuste-as se mudar de endereço/domínio.
+**Fonts (Google Fonts — already used on homepage):**
+- `Cormorant Garamond` (300, 400, 600 + italic) — headings, body text
+- `JetBrains Mono` (300, 400, 500) — code, URLs, technical content
 
-## Deploy
+**Animation:** `rise` keyframe — `opacity: 0; transform: translateY(18px)` → `opacity: 1; translateY(0)`, `0.9s cubic-bezier(0.16,1,0.3,1)`
 
-Não há build step — o Pages serve `/public` e descobre as Functions em `/functions`.
+**Layout:** single column, `max-width: 680px`, centered, `padding: 48px 32px 72px`
 
-1. Conecte o repositório no Cloudflare Pages (ou rode `wrangler pages deploy public`).
-2. Build command: *(vazio)*. Output directory: `public`.
-3. Configure os 3 secrets acima.
-4. Acesse a URL, entre com `ADMIN_PASSWORD`.
+---
 
-## Desenvolvimento local
+## How to Use This Repo in Future Claude Sessions
 
-```sh
-# crie .dev.vars (no .gitignore) com OMG_API_KEY / ADMIN_PASSWORD / SESSION_SECRET / OMG_ADDRESS
-npm run dev          # wrangler pages dev public
+Each subdomain is best done as its own Claude Code session on the web (claude.ai/code).
+
+**Starting a new session:**
+1. Open **this repo** (`lucafchala/OMG.LOL_INTEGRATION`) in Claude Code on the web
+2. Claude will read this README and have full context automatically
+3. Say which checklist item you want to tackle, e.g.: *"Let's do lucafchala.com — the main homepage"*
+4. Claude will create the files for the new repo, which you then create on GitHub and connect to Cloudflare Pages
+5. Come back here and check off the completed item
+
+**You do NOT need to re-explain the migration, the design system, or the data structure** — this README is the source of truth for all sessions. Update checkboxes as you go.
+
+**For Claude:** The export data is in `omg-export/` locally on the user's machine (gitignored). The content you need (homepage HTML, paste content, now page) has been shown in this conversation. If you need to reference specific content, ask the user to paste or upload the relevant file from their `omg-export/` folder.
+
+---
+
+## What's in This Repo
+
+The original omg.lol admin panel code is preserved for reference:
+
+```
+public/              SPA admin panel (HTML/CSS/JS)
+  index.html         login + app shell
+  style.css          terminal/industrial design
+  app.js             SPA router, fetch, CodeMirror editor
+functions/           Cloudflare Pages Functions
+  _lib/auth.js       HMAC-SHA256 cookie auth (reusable)
+  _lib/omg.js        omg.lol API client (now unused)
+  api/               route handlers (web, pastes, purls, auth)
+mcp/                 MCP server for Claude Code (non-functional, omg.lol gone)
+scripts/
+  export-omg.mjs     Node.js full account export script
+  export-omg.bat     Windows batch export (curl)
+  extract-export.mjs extracts raw JSON into readable files
+test/
+  auth.test.js       HMAC cookie auth unit tests (node --test)
+omg-export/          exported data — gitignored, local only
 ```
 
-### Mock mode (sem backend)
+---
 
-Para exercitar a UI sem Cloudflare nem omg.lol, abra a app com `?mock=1`
-(ou rode `localStorage.setItem('omgadmin_mock','1')`). A camada de fetch passa a
-servir fixtures em memória para web/pastes/purls e um login falso — útil para
-testar layout e interações. Um selo **MOCK** aparece no cabeçalho. O mock é
-ignorado em produção (sem o parâmetro/flag).
+## Identity / Quick Reference
 
-## Editar com o Claude Code (MCP)
-
-Além do painel web, dá para gerenciar o omg.lol direto de uma sessão do
-**Claude Code** — sem precisar de API key da Anthropic, usando a sua assinatura
-existente. O repo inclui um **MCP server** sem dependências (`mcp/omglol-server.mjs`)
-que expõe a API do omg.lol como ferramentas.
-
-Ele já está registrado em `.mcp.json` (escopo do projeto). Para usar:
-
-1. Exporte sua API key do omg.lol no ambiente onde o Claude Code roda:
-   ```sh
-   export OMG_API_KEY="sua-api-key-do-omg-lol"
-   ```
-   (O `.mcp.json` expande `${OMG_API_KEY}` — a chave nunca é versionada.)
-2. Abra o Claude Code neste repositório e aprove o servidor MCP `omglol` quando
-   for solicitado (`/mcp` lista o status).
-3. Peça em linguagem natural, ex.: *"mostre minha homepage atual e adicione uma
-   seção de projetos"* ou *"crie um PURL `gh` apontando para o meu GitHub"*.
-
-Requer **Node 18+** (usa `fetch` nativo). Ferramentas disponíveis:
-
-| Ferramenta | Ação |
-|------------|------|
-| `get_homepage` / `set_homepage` | lê / substitui o HTML da homepage |
-| `list_pastes` / `get_paste` | lista / lê pastes |
-| `create_or_update_paste` / `delete_paste` | cria-atualiza / deleta paste |
-| `list_purls` | lista PURLs |
-| `create_or_update_purl` / `delete_purl` | cria-atualiza / deleta PURL |
-
-## Testes
-
-```sh
-npm test             # node --test → testes do cookie HMAC (assinatura/verificação)
-```
-
-## Notas
-
-- CodeMirror 6 é carregado via CDN ESM (esm.sh). Se o CDN estiver indisponível,
-  o editor degrada graciosamente para um `<textarea>`.
-- O preview da homepage usa `iframe[srcdoc]` (sem CORS), com debounce de 500ms.
-- Cache em memória por seção: fetch na primeira visita, servido do cache depois,
-  botão ↺ força refetch, e qualquer mutação invalida e recarrega aquela seção.
-  Sem polling.
+| | |
+|---|---|
+| Domain | `lucafchala.com` |
+| Email | `lfchala4@gmail.com` · `luca@lucafchala.com` |
+| Instagram | `@lucafchala` |
+| Radio | PU2XIK — São Paulo, BR |
+| PGP fingerprint | `48E7 3F6F A287 1E7B 86EF EA64 8EC4 329A 369B 7B33` |
+| Cloudflare account | linked to `lfchala4@gmail.com` |
+| GitHub | `lucafchala` |
