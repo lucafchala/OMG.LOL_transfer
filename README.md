@@ -60,7 +60,7 @@ Ordered by priority. **Start a fresh Claude Code session for each one** — read
 
 ### 🔴 Priority 1 — Site is completely dark without these
 
-- [ ] **`lucafchala.com`** — Main homepage + PURLs
+- [x] **`lucafchala.com`** — Main homepage + PURLs
   - New repo: `lucafchala/lucafchala.com`
   - Output ready in `output/lucafchala.com/` — deploy both files:
     - `index.html` — cleaned-up homepage
@@ -71,7 +71,7 @@ Ordered by priority. **Start a fresh Claude Code session for each one** — read
     - Update `.services` section links for subdomains not yet deployed
     - Fix footer PGP/SSH links → `paste.lucafchala.com/{pgp,ssh}` (works once paste is up)
 
-- [ ] **`dash.lucafchala.com`** — Main control panel (PWA, installable)
+- [x] **`dash.lucafchala.com`** — Main control panel (PWA, installable)
   - New repo: `lucafchala/dash.lucafchala.com`
   - Output ready in `output/dash.lucafchala.com/` (5 files: index.html, data.json, manifest.json, sw.js, icon.svg)
   - Features: service hubs (Fotos primary), GitHub repo links, Cloudflare links, full PURL list with search/copy
