@@ -60,23 +60,31 @@ Ordered by priority. **Start a fresh Claude Code session for each one** — read
 
 ### 🔴 Priority 1 — Site is completely dark without these
 
-- [ ] **`lucafchala.com`** — Main homepage
+- [ ] **`lucafchala.com`** — Main homepage + PURLs
   - New repo: `lucafchala/lucafchala.com`
-  - Source: `content/homepage/index.html` as `index.html`
-  - Also add `content/redirects/_redirects` as `_redirects` (handles `/instagram`, `/signal`, `/buymeacoffee`, etc.)
-  - Output ready in `output/lucafchala.com/` (cleaned-up files, deploy these)
+  - Output ready in `output/lucafchala.com/` — deploy both files:
+    - `index.html` — cleaned-up homepage
+    - `_redirects` — 40 PURLs at `lucafchala.com/slug` (all fixed and grouped)
   - Cloudflare Pages: no build command, output directory `/` (root)
-  - DNS: update `lucafchala.com` root record — change CNAME target from `hosted.omg.lol` to the Pages project URL
-  - Remaining cleanup (do after subdomains are live):
-    - Update `.services` section links for any subdomain that isn't deployed yet
-    - Fix footer PGP/SSH links — currently pointing to `paste.lucafchala.com/{pgp,ssh}` (will work once paste site is up)
+  - DNS: update `lucafchala.com` root record — change CNAME from `hosted.omg.lol` to Pages project URL
+  - Remaining cleanup (after subdomains are live):
+    - Update `.services` section links for subdomains not yet deployed
+    - Fix footer PGP/SSH links → `paste.lucafchala.com/{pgp,ssh}` (works once paste is up)
 
-- [ ] **`url.lucafchala.com`** — Short link redirects (PURLs)
+- [ ] **`dash.lucafchala.com`** — Main control panel (PWA, installable)
+  - New repo: `lucafchala/dash.lucafchala.com`
+  - Output ready in `output/dash.lucafchala.com/` (5 files: index.html, data.json, manifest.json, sw.js, icon.svg)
+  - Features: service hubs (Fotos primary), GitHub repo links, Cloudflare links, full PURL list with search/copy
+  - Copy button copies `lucafchala.com/slug` (PURLs from main domain)
+  - Cloudflare Pages: no build, root output
+  - DNS: add `dash.lucafchala.com` CNAME → Pages project URL
+
+- [ ] **`url.lucafchala.com`** — Mirror PURL domain (optional)
   - New repo: `lucafchala/url.lucafchala.com`
-  - Source: `content/redirects/_redirects` — rename to `_redirects`, no other files needed
-  - Cloudflare Pages: no build, root output — Pages reads `_redirects` automatically
+  - Output in `output/url.lucafchala.com/` — just `_redirects`, same rules as `lucafchala.com`
+  - Cloudflare Pages: no build, root output
   - DNS: update `url.lucafchala.com` CNAME → Pages project URL
-  - Note: `proof.lucafchala.com` was also a PURLs domain on omg.lol — point it here or redirect to `lucafchala.com`
+  - Note: PURLs are primarily at `lucafchala.com/slug`; this domain is a secondary mirror
 
 ---
 
@@ -235,8 +243,16 @@ content/             Exported omg.lol content (committed, source of truth)
     photography-gear.md
 output/              Production-ready files for each new repo (created per session)
   lucafchala.com/
-    index.html       Cleaned-up homepage (deploy to lucafchala/lucafchala.com)
-    _redirects       PURLs redirects file
+    index.html       Cleaned-up homepage
+    _redirects       40 PURLs at lucafchala.com/slug (all 17 previously broken now fixed)
+  dash.lucafchala.com/
+    index.html       Control panel dashboard (PWA)
+    data.json        38 PURLs with group metadata for dashboard display
+    manifest.json    PWA manifest
+    sw.js            Service worker (offline + installable)
+    icon.svg         App icon
+  url.lucafchala.com/
+    _redirects       Mirror of lucafchala.com/_redirects
 functions/           Original omg.lol admin panel backend
   _lib/
     auth.js          HMAC-SHA256 cookie auth (Web Crypto API, reusable)
