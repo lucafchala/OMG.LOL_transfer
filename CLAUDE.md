@@ -7,13 +7,14 @@ This repo is a **migration reference and hub** for moving Luca F. Chala's person
 Central coordination point for the migration. Contains:
 - The original omg.lol admin panel code (preserved for reference / possible repurposing)
 - Export scripts used to pull data from omg.lol before expiry
-- `omg-export/` directory (gitignored) with the full account backup
+- `content/` directory with all exported content (committed, ready to use)
+- `output/` directory where production-ready files for each new repo are written
 
 ## Your role as Claude in this repo
 
 When a session opens here, the user wants to tackle one item from the migration checklist in `README.md`. Each checklist item results in:
 1. A new GitHub repo (user creates it via github.com/new)
-2. Files you write/commit here or describe for the user to copy
+2. Files you write to `output/<subdomain>/` in this repo
 3. Cloudflare Pages project (user sets up in dashboard)
 4. DNS update (user does in Cloudflare DNS)
 
@@ -28,19 +29,21 @@ When a session opens here, the user wants to tackle one item from the migration 
 - Mobile-first (Samsung S26 Ultra primary device)
 - PT-BR primary language, EN secondary (pages should support both where applicable)
 
-## Export data
+## Content data
 
-`omg-export/` is gitignored and lives only on the user's local machine. If you need content from it (homepage HTML, paste content, now page markdown), ask the user to paste or upload the relevant file. The key files are:
-- `omg-export/web/index.html` — homepage HTML (23KB)
-- `omg-export/pastes/*.txt` — 14 pastes as text files
-- `omg-export/_redirects` — 23 active PURLs in Cloudflare Pages format
-- `omg-export/now.md` — /now page content
-- `omg-export/weblog/*.md` — 2 blog posts
+All exported content is committed in `content/` — read it directly, no need to ask the user to paste files.
 
-## Development branch
+| Path | What it is |
+|---|---|
+| `content/homepage/index.html` | Homepage HTML (~23KB) |
+| `content/now/now.md` | /now page markdown |
+| `content/pastes/*.txt` | 5 pastes (a-mascara, camera-gear, e-mail-me, nirvana-..., vela_f5-2024) |
+| `content/redirects/_redirects` | 23 active PURLs in Cloudflare Pages format |
+| `content/weblog/*.md` | 2 blog posts |
 
-Work on: `claude/new-session-qOrVA`
-Push to: `origin claude/new-session-qOrVA`
+## Output convention
+
+Write production-ready files to `output/<subdomain>/`. Example: `output/lucafchala.com/index.html`. The user copies these to the new GitHub repo.
 
 ## Auth code (reusable)
 

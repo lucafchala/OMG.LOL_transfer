@@ -2,7 +2,7 @@
 
 This repo is the central reference for migrating **Luca F. Chala's** personal web presence off [omg.lol](https://omg.lol) and onto self-hosted [Cloudflare Pages](https://pages.cloudflare.com) projects.
 
-**omg.lol subscription expired: 2026-06-06.** All data was exported before expiry. This repo documents what existed, what needs to be rebuilt, and tracks progress.
+**omg.lol subscription expired: 2026-06-06.** All data was exported before expiry and lives in `content/` in this repo. This document tracks what existed, what needs to be rebuilt, and migration progress.
 
 ---
 
@@ -18,35 +18,36 @@ The previous setup used omg.lol to host and route everything under `lucafchala.c
 
 ---
 
-## Exported Data (in `omg-export/`)
+## Content (in `content/`)
 
-All content was exported from the omg.lol API on 2026-06-05, one day before expiry.
+All content was exported from the omg.lol API on 2026-06-05, one day before expiry, and committed here.
 
 | File | Contents |
 |---|---|
-| `omg-export/web/index.html` | Full homepage HTML (23KB) |
-| `omg-export/pastes/*.txt` | 14 pastes as individual text files |
-| `omg-export/pastebin.json` | Raw pastebin API response |
-| `omg-export/purls.json` | Raw PURLs API response (40 PURLs) |
-| `omg-export/_redirects` | PURLs converted to Cloudflare Pages `_redirects` format |
-| `omg-export/now.md` | /now page markdown |
-| `omg-export/weblog/` | 2 weblog posts as markdown |
-| `omg-export/statuses.json` | 5 old statuslog entries |
-| `omg-export/email.json` | Email forwarding: `tucas@omg.lol` → `lfchala4@gmail.com` |
-| `omg-export/switchboard.md` | Switchboard DNS config (documented, not content) |
-| `omg-export/info.json` | Account info, registration, PGP/SSH keys |
+| `content/homepage/index.html` | Full homepage HTML (~23KB) |
+| `content/now/now.md` | /now page markdown (updated May 20, 2026) |
+| `content/pastes/a-mascara.txt` | School video project page |
+| `content/pastes/camera-gear.txt` | Photography gear list (most up-to-date) |
+| `content/pastes/e-mail-me.txt` | Contact info |
+| `content/pastes/nirvana-e-a-cultura-do-ultrarromantismo.txt` | School video project page |
+| `content/pastes/vela_f5-2024.txt` | School video project page |
+| `content/redirects/_redirects` | PURLs as Cloudflare Pages `_redirects` format |
+| `content/weblog/chatgpt-should-not-have-been-released.md` | Blog post (Dec 2023) |
+| `content/weblog/photography-gear.md` | Blog post (Jun 2024) |
 
-> `omg-export/` is gitignored — the data lives only in your local clone.
+> The raw omg.lol API export (`omg-export/`) is gitignored and lives only in the original export machine. Everything worth keeping has been extracted above.
 
 ### PURLs summary
-- **40 total** — 23 active, 17 already broken (pointed to expired `paste.tucas.me` / `tucas.me`)
-- High-traffic active ones: `piauifut2024` (1135 hits), `instagram` (734), `signal` (533), `buymeacoffee` (510), `simplex` (898), `piauifut2025` (343)
+- **23 active** redirects in `content/redirects/_redirects`
+- **17 broken** (commented out) — pointed to expired `paste.tucas.me` / `tucas.me`
+- High-traffic active ones: `/piauifut2024`, `/instagram`, `/signal`, `/buymeacoffee`, `/simplex`, `/piauifut2025`
 
-### Notable pastes
+### Pastes present (5 files)
 - `camera-gear` — full photography gear list (most up-to-date version)
-- `proof-of-ownership` — PGP-signed domain ownership proof
-- `pgp` — public PGP key block
-- `vela_f5-2024`, `a-mascara`, `nirvana-*` — school video project pages (with Drive links)
+- `a-mascara`, `nirvana-e-a-cultura-do-ultrarromantismo`, `vela_f5-2024` — school video project pages (with Drive links)
+- `e-mail-me` — contact info
+
+> Note: some pastes from the original export were internal test/scratch files (`teste-api`, `pix`, `sessionid`, etc.) and were not committed.
 
 ---
 
@@ -61,17 +62,18 @@ Ordered by priority. **Start a fresh Claude Code session for each one** — read
 
 - [ ] **`lucafchala.com`** — Main homepage
   - New repo: `lucafchala/lucafchala.com`
-  - Source: `omg-export/web/index.html` as `index.html`
-  - Also add `omg-export/_redirects` as `_redirects` (handles `/instagram`, `/signal`, `/buymeacoffee`, etc.)
+  - Source: `content/homepage/index.html` as `index.html`
+  - Also add `content/redirects/_redirects` as `_redirects` (handles `/instagram`, `/signal`, `/buymeacoffee`, etc.)
+  - Output ready in `output/lucafchala.com/` (cleaned-up files, deploy these)
   - Cloudflare Pages: no build command, output directory `/` (root)
   - DNS: update `lucafchala.com` root record — change CNAME target from `hosted.omg.lol` to the Pages project URL
-  - Cleanup needed in the HTML before publishing:
-    - Remove the duplicate `<link rel="icon" href="https://tucas.omg.lol/favicon.ico">` near the top
-    - Update the `.services` section footer links (they point to omg.lol subdomains — update as each one gets rebuilt, or remove the section for now)
+  - Remaining cleanup (do after subdomains are live):
+    - Update `.services` section links for any subdomain that isn't deployed yet
+    - Fix footer PGP/SSH links — currently pointing to `paste.lucafchala.com/{pgp,ssh}` (will work once paste site is up)
 
 - [ ] **`url.lucafchala.com`** — Short link redirects (PURLs)
   - New repo: `lucafchala/url.lucafchala.com`
-  - Source: `omg-export/_redirects` — rename to `_redirects`, no other files needed
+  - Source: `content/redirects/_redirects` — rename to `_redirects`, no other files needed
   - Cloudflare Pages: no build, root output — Pages reads `_redirects` automatically
   - DNS: update `url.lucafchala.com` CNAME → Pages project URL
   - Note: `proof.lucafchala.com` was also a PURLs domain on omg.lol — point it here or redirect to `lucafchala.com`
@@ -82,23 +84,23 @@ Ordered by priority. **Start a fresh Claude Code session for each one** — read
 
 - [ ] **`now.lucafchala.com`** — /now page
   - New repo: `lucafchala/now.lucafchala.com`
-  - Source: `omg-export/now.md` — needs a simple HTML wrapper matching the homepage aesthetic
+  - Source: `content/now/now.md` — needs a simple HTML wrapper matching the homepage aesthetic
   - Last updated: May 20, 2026 (still current content)
   - DNS: update `now.lucafchala.com` CNAME → Pages project URL
   - Fix in content: remove the `[Back to my omg.lol page!](https://tucas.omg.lol)` link at the bottom
 
 - [ ] **`paste.lucafchala.com`** — Pastes / text snippets
   - New repo: `lucafchala/paste.lucafchala.com`
-  - Source: selected pastes from `omg-export/pastes/`
-  - Pastes worth keeping public: `camera-gear`, `proof-of-ownership`, `pgp`, school video pages (`vela_f5`, `a-mascara`, `nirvana-*`)
-  - Pastes to drop: `teste-api`, `teste-flipper-`, `pasta-bin`, `pix`, `sessionid`, `session-id`, `cloudspot_deprecation`
+  - Source: `content/pastes/`
+  - All 5 committed pastes are worth publishing; drop nothing
   - Design: simple index page listing pastes + individual pages per paste, matching homepage aesthetic
   - DNS: update `paste.lucafchala.com` CNAME → Pages project URL
+  - Important: homepage footer links to `paste.lucafchala.com/pgp` and `paste.lucafchala.com/ssh` — add those once paste site is up
 
 - [ ] **`proof.lucafchala.com`** — Ownership proof
   - Simplest option: redirect `proof.lucafchala.com` → `paste.lucafchala.com/proof-of-ownership` once paste site is up
   - Or: standalone one-page site serving the PGP-signed proof text
-  - Source: `omg-export/pastes/proof-of-ownership.txt`
+  - Note: `proof-of-ownership.txt` was not committed (was internal — regenerate from PGP key if needed)
   - DNS: update `proof.lucafchala.com` CNAME → wherever it ends up
 
 ---
@@ -106,17 +108,17 @@ Ordered by priority. **Start a fresh Claude Code session for each one** — read
 ### 🟢 Priority 3 — Nice to have, not urgent
 
 - [ ] **`weblog.lucafchala.com`** — Blog
-  - New repo: `lucafchala/weblog.lucafchala.com`
-  - Source: `omg-export/weblog/photography_gear.md` and `chatgpt_should_not_have_been_released_.md`
+  - New repo: `lucafchara/weblog.lucafchala.com`
+  - Source: `content/weblog/chatgpt-should-not-have-been-released.md` and `content/weblog/photography-gear.md`
   - Only 2 posts — simple static HTML, index + one page per post
-  - Use `camera-gear` paste version for gear list (more up-to-date than the weblog post)
+  - Use `content/pastes/camera-gear.txt` for gear list (more up-to-date than the weblog post)
   - DNS: update `weblog.lucafchala.com` CNAME → Pages project URL
 
 - [ ] **`log.lucafchala.com`** — Statuslog
   - Only 5 old entries (2024), essentially unused
   - Options: skip entirely and remove from homepage, or a simple status page
   - If keeping: simplest is a static HTML page with the 5 entries hardcoded
-  - Source: `omg-export/statuses.json`
+  - Note: the raw `statuses.json` was not committed (5 entries, all 2024)
 
 - [ ] **`pictures.lucafchala.com`** — Photos
   - The omg.lol account had zero pictures uploaded here
@@ -132,9 +134,9 @@ Ordered by priority. **Start a fresh Claude Code session for each one** — read
 ### ⚙️ Ongoing / Infrastructure
 
 - [ ] **Homepage cleanup** (after subdomains are rebuilt)
-  - Replace `.services` section omg.lol links with links to new subdomains
+  - Replace `.services` section links for any subdomain not yet live (currently all link to `lucafchala.com` subdomains — correct, just need the targets to exist)
   - Verify `fotos.lucafchala.com` still works (photography link)
-  - Update footer: `proof.lucafchala.com` link, PGP/SSH key links (currently `home.omg.lol/keys/...` — these will 404)
+  - Add PGP/SSH pastes at `paste.lucafchala.com/pgp` and `/ssh` (footer links point there)
   - Consider adding a `favicon.svg` file to the homepage repo
 
 - [ ] **omg.lucafchala.com** — Admin panel (this repo, currently deployed)
@@ -200,39 +202,49 @@ Replicate these values across all pages for visual consistency:
 Each subdomain is best done as its own Claude Code session on the web (claude.ai/code).
 
 **Starting a new session:**
-1. Open **this repo** (`lucafchala/OMG.LOL_INTEGRATION`) in Claude Code on the web
+1. Open **this repo** (`lucafchala/OMG.LOL_transfer`) in Claude Code on the web
 2. Claude will read this README and have full context automatically
 3. Say which checklist item you want to tackle, e.g.: *"Let's do lucafchala.com — the main homepage"*
-4. Claude will create the files for the new repo, which you then create on GitHub and connect to Cloudflare Pages
+4. Claude will create the files for the new repo under `output/<subdomain>/`, which you then create on GitHub and connect to Cloudflare Pages
 5. Come back here and check off the completed item
 
 **You do NOT need to re-explain the migration, the design system, or the data structure** — this README is the source of truth for all sessions. Update checkboxes as you go.
 
-**For Claude:** The export data is in `omg-export/` locally on the user's machine (gitignored). The content you need (homepage HTML, paste content, now page) has been shown in this conversation. If you need to reference specific content, ask the user to paste or upload the relevant file from their `omg-export/` folder.
+**All exported content is in `content/`** — Claude can read it directly. No need to paste files.
 
 ---
 
 ## What's in This Repo
 
-The original omg.lol admin panel code is preserved for reference:
-
 ```
-public/              SPA admin panel (HTML/CSS/JS)
-  index.html         login + app shell
-  style.css          terminal/industrial design
-  app.js             SPA router, fetch, CodeMirror editor
-functions/           Cloudflare Pages Functions
-  _lib/auth.js       HMAC-SHA256 cookie auth (reusable)
-  _lib/omg.js        omg.lol API client (now unused)
-  api/               route handlers (web, pastes, purls, auth)
-mcp/                 MCP server for Claude Code (non-functional, omg.lol gone)
+content/             Exported omg.lol content (committed, source of truth)
+  homepage/
+    index.html       Full homepage HTML
+  now/
+    now.md           /now page markdown
+  pastes/            5 text pastes
+    a-mascara.txt
+    camera-gear.txt
+    e-mail-me.txt
+    nirvana-e-a-cultura-do-ultrarromantismo.txt
+    vela_f5-2024.txt
+  redirects/
+    _redirects       23 active PURLs in Cloudflare Pages format
+  weblog/
+    chatgpt-should-not-have-been-released.md
+    photography-gear.md
+output/              Production-ready files for each new repo (created per session)
+  lucafchala.com/
+    index.html       Cleaned-up homepage (deploy to lucafchala/lucafchala.com)
+    _redirects       PURLs redirects file
+functions/           Original omg.lol admin panel backend
+  _lib/
+    auth.js          HMAC-SHA256 cookie auth (Web Crypto API, reusable)
+    omg.js           omg.lol API client (now unused)
 scripts/
   export-omg.mjs     Node.js full account export script
   export-omg.bat     Windows batch export (curl)
-  extract-export.mjs extracts raw JSON into readable files
-test/
-  auth.test.js       HMAC cookie auth unit tests (node --test)
-omg-export/          exported data — gitignored, local only
+  extract-export.mjs Extracts raw JSON into readable files
 ```
 
 ---
