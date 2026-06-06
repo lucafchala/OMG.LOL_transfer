@@ -1,7 +1,7 @@
 # TODO
 - [ ] update `.services` section in homepage once all subdomains are live
-- [ ] sync `url.lucafchala.com/_redirects` when PURLs are saved from dashboard (dashboard currently only writes `lucafchala.com` + `dash` repos) — or phase out `url.` entirely
-- [ ] phase out `url.lucafchala.com` — decide: keep as mirror or remove DNS entry
+- [x] sync `url.lucafchala.com/_redirects` when PURLs are saved from dashboard (dashboard currently only writes `lucafchala.com` + `dash` repos) — or phase out `url.` entirely
+- [x] phase out `url.lucafchala.com` — decide: keep as mirror or remove DNS entry
 - [ ] build `now.lucafchala.com` (source: `content/now/now.md`)
 
 # lucafchala — Migration Hub
