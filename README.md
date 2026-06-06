@@ -68,14 +68,15 @@ Ordered by priority. **Start a fresh Claude Code session for each one** — read
   - Cloudflare Pages: no build command, output directory `/` (root)
   - DNS: update `lucafchala.com` root record — change CNAME from `hosted.omg.lol` to Pages project URL
   - Remaining cleanup (after subdomains are live):
-    - Update `.services` section links for subdomains not yet deployed
-    - Fix footer PGP/SSH links → `paste.lucafchala.com/{pgp,ssh}` (works once paste is up)
+    - Update `.services` section links for any subdomain not yet deployed
 
 - [ ] **`dash.lucafchala.com`** — Main control panel (PWA, installable)
   - New repo: `lucafchala/dash.lucafchala.com`
   - Output ready in `output/dash.lucafchala.com/` (5 files: index.html, data.json, manifest.json, sw.js, icon.svg)
-  - Features: service hubs (Fotos primary), GitHub repo links, Cloudflare links, full PURL list with search/copy
-  - Copy button copies `lucafchala.com/slug` (PURLs from main domain)
+  - Features: service hubs (Fotos primary, radio.lucafchala.com added), GitHub repo links, Cloudflare links
+  - Full PURL management: add/edit/delete + save to GitHub via API (writes `_redirects` + `data.json`)
+  - Full paste management: add/edit/delete + save to GitHub via API (writes `pastes.json`, creates new slug dirs)
+  - GitHub PAT stored in localStorage; GH button in controls bar turns amber when configured
   - Cloudflare Pages: no build, root output
   - DNS: add `dash.lucafchala.com` CNAME → Pages project URL
 
@@ -99,11 +100,14 @@ Ordered by priority. **Start a fresh Claude Code session for each one** — read
 
 - [ ] **`paste.lucafchala.com`** — Pastes / text snippets
   - New repo: `lucafchala/paste.lucafchala.com`
-  - Source: `content/pastes/`
-  - All 5 committed pastes are worth publishing; drop nothing
-  - Design: simple index page listing pastes + individual pages per paste, matching homepage aesthetic
+  - **Output ready in `output/paste.lucafchala.com/`** — deploy all files:
+    - `index.html` — dynamic listing, fetches `pastes.json`, PT/EN toggle
+    - `pastes.json` — source of truth for all 6 pastes (5 original + pgp key)
+    - `{slug}/index.html` — one per paste (shared template, slug resolved at runtime)
+    - `_redirects`, `_headers` (CORS on pastes.json), `sw.js`, `icon.svg`
+  - Dashboard manages all pastes via GitHub API — no manual editing needed after deploy
+  - Homepage footer already links to `paste.lucafchala.com/pgp` and `/ssh`
   - DNS: update `paste.lucafchala.com` CNAME → Pages project URL
-  - Important: homepage footer links to `paste.lucafchala.com/pgp` and `paste.lucafchala.com/ssh` — add those once paste site is up
 
 - [ ] **`proof.lucafchala.com`** — Ownership proof
   - Simplest option: redirect `proof.lucafchala.com` → `paste.lucafchala.com/proof-of-ownership` once paste site is up
@@ -246,13 +250,20 @@ output/              Production-ready files for each new repo (created per sessi
     index.html       Cleaned-up homepage
     _redirects       40 PURLs at lucafchala.com/slug (all 17 previously broken now fixed)
   dash.lucafchala.com/
-    index.html       Control panel dashboard (PWA)
-    data.json        38 PURLs with group metadata for dashboard display
+    index.html       Control panel + PURL & paste management via GitHub API
+    data.json        PURLs with group metadata for dashboard display
     manifest.json    PWA manifest
     sw.js            Service worker (offline + installable)
     icon.svg         App icon
   url.lucafchala.com/
     _redirects       Mirror of lucafchala.com/_redirects
+  paste.lucafchala.com/
+    index.html       Dynamic listing page (fetches pastes.json)
+    pastes.json      Source of truth for all pastes
+    pgp/index.html   (and 5 other slug dirs) shared fetch-and-render template
+    _redirects       Slug aliases
+    _headers         CORS on /pastes.json
+    sw.js / icon.svg PWA assets
 functions/           Original omg.lol admin panel backend
   _lib/
     auth.js          HMAC-SHA256 cookie auth (Web Crypto API, reusable)
