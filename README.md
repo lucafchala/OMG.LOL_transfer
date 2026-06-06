@@ -1,11 +1,8 @@
 # TODO
-- continue homepage tools update on claude chat
-- find a way to sincronize homepage and url. redirects and html
-- phase out url.
-- ask claude to update this readme and create a simple todo like this
-
-
-
+- [ ] update `.services` section in homepage once all subdomains are live
+- [ ] sync `url.lucafchala.com/_redirects` when PURLs are saved from dashboard (dashboard currently only writes `lucafchala.com` + `dash` repos) — or phase out `url.` entirely
+- [ ] phase out `url.lucafchala.com` — decide: keep as mirror or remove DNS entry
+- [ ] build `now.lucafchala.com` (source: `content/now/now.md`)
 
 # lucafchala — Migration Hub
 
