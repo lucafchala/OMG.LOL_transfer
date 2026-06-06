@@ -291,6 +291,11 @@
                     <label>Repo — pastes.json</label>
                     <input type="text" id="input-repo-paste" placeholder="lucafchala/paste.lucafchala.com" spellcheck="false">
                 </div>
+                <div class="modal-field">
+                    <label>Repo — url mirror (optional)</label>
+                    <input type="text" id="input-repo-url" placeholder="lucafchala/url.lucafchala.com" spellcheck="false">
+                    <span class="modal-hint">Se configurado, _redirects é sincronizado automaticamente ao salvar.</span>
+                </div>
             </div>
             <div class="modal-actions">
                 <button class="act-btn ok" onclick="saveSettingsAndClose()" id="lbl-settings-save">Salvar</button>
@@ -409,7 +414,7 @@
     ];
 
     /* ── GitHub API ── */
-    const GH_DEFAULTS = { repoHome: 'lucafchala/lucafchala.com', repoDash: 'lucafchala/dash.lucafchala.com', repoPaste: 'lucafchala/paste.lucafchala.com' };
+    const GH_DEFAULTS = { repoHome: 'lucafchala/lucafchala.com', repoDash: 'lucafchala/dash.lucafchala.com', repoPaste: 'lucafchala/paste.lucafchala.com', repoUrl: 'lucafchala/url.lucafchala.com' };
 
     function cfg() {
         return {
@@ -417,6 +422,7 @@
             repoHome: localStorage.getItem('gh_repo_home') || GH_DEFAULTS.repoHome,
             repoDash: localStorage.getItem('gh_repo_dash') || GH_DEFAULTS.repoDash,
             repoPaste: localStorage.getItem('gh_repo_paste') || GH_DEFAULTS.repoPaste,
+            repoUrl: localStorage.getItem('gh_repo_url') || GH_DEFAULTS.repoUrl,
         };
     }
     function isAuth() { return !!cfg().pat; }
@@ -464,6 +470,7 @@
         el('input-repo-home').value = c.repoHome;
         el('input-repo-dash').value = c.repoDash;
         el('input-repo-paste').value = c.repoPaste;
+        el('input-repo-url').value = c.repoUrl;
         el('settings-overlay').style.display = 'flex';
     }
     function hideSettings() { el('settings-overlay').style.display = 'none'; }
@@ -473,6 +480,7 @@
         localStorage.setItem('gh_repo_home', el('input-repo-home').value.trim() || GH_DEFAULTS.repoHome);
         localStorage.setItem('gh_repo_dash', el('input-repo-dash').value.trim() || GH_DEFAULTS.repoDash);
         localStorage.setItem('gh_repo_paste', el('input-repo-paste').value.trim() || GH_DEFAULTS.repoPaste);
+        localStorage.setItem('gh_repo_url', el('input-repo-url').value.trim() || GH_DEFAULTS.repoUrl);
         hideSettings();
         updateGhBtn();
         renderRedirects(el('search').value);
@@ -622,12 +630,19 @@
         const btn = el('lbl-purl-save');
         btn.textContent = '…'; btn.disabled = true;
         try {
-            const { repoHome, repoDash } = cfg();
+            const { repoHome, repoDash, repoUrl } = cfg();
+            const redirectsContent = genRedirectsFile(redirects);
             const [hf, df] = await Promise.all([getFile(repoHome, '_redirects'), getFile(repoDash, 'data.json')]);
-            await Promise.all([
-                putFile(repoHome, '_redirects', genRedirectsFile(redirects), hf.sha, 'update redirects via dash.lucafchala.com'),
+            const writes = [
+                putFile(repoHome, '_redirects', redirectsContent, hf.sha, 'update redirects via dash.lucafchala.com'),
                 putFile(repoDash, 'data.json', genDataJson(redirects), df.sha, 'update data.json via dash.lucafchala.com'),
-            ]);
+            ];
+            /* also sync url.lucafchala.com if configured and reachable */
+            if (repoUrl) {
+                const uf = await getFile(repoUrl, '_redirects').catch(() => null);
+                if (uf) writes.push(putFile(repoUrl, '_redirects', redirectsContent, uf.sha, 'sync redirects via dash.lucafchala.com'));
+            }
+            await Promise.all(writes);
             savedRedirects = JSON.parse(JSON.stringify(redirects));
             btn.textContent = '✓'; btn.classList.add('ok');
             setTimeout(() => { btn.textContent = 'salvar'; btn.disabled = false; btn.classList.remove('ok'); updatePurlSaveBar(); }, 2500);
