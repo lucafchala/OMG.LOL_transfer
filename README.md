@@ -64,6 +64,15 @@ All content was exported from the omg.lol API on 2026-06-05, one day before expi
 Each item is one GitHub repo + one Cloudflare Pages project + one DNS update.
 Ordered by priority. **Start a fresh Claude Code session for each one** — read the "How to use" section below first.
 
+> **Scaffolds ready (README + folder structure only — pages NOT yet generated):** the remaining repos have a build-spec README staged in `output/<subdomain>/`, ready to code pages into later:
+> - `output/now.lucafchala.com/` — `/now` page (source: `content/now/now.md`)
+> - `output/weblog.lucafchala.com/` — blog index + `2023/12/…` and `2024/06/…` post folders (sources: `content/weblog/*.md`)
+> - `output/proof.lucafchala.com/` — ownership proof / PGP (standalone page **or** redirect to a paste)
+> - `output/keys.lucafchala.com/` — SSH + PGP public keys *(referenced by the live homepage/`url` hub, but not in the original plan — decide canonical home vs. `proof`/pastes)*
+> - `output/pictures.lucafchala.com/` — **redirect-only** → `fotos.lucafchala.com` (or drop DNS)
+> - `output/tildverse.lucafchala.com/` — **redirect-only** → `lucafchala.com` (or drop DNS)
+> - `output/log.lucafchala.com/` — optional; redirect or a 5-entry static page
+
 ---
 
 ### 🔴 Priority 1 — Site is completely dark without these
