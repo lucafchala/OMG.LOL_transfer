@@ -6,6 +6,8 @@
 
 # lucafchala — Migration Hub
 
+> Part of the [lucafchala.com ecosystem](https://github.com/lucafchala/lucafchala.com#the-ecosystem). For the live network map, shared design system, and conventions, see the [hub README](https://github.com/lucafchala/lucafchala.com#readme).
+
 This repo is the central reference for migrating **Luca F. Chala's** personal web presence off [omg.lol](https://omg.lol) and onto self-hosted [Cloudflare Pages](https://pages.cloudflare.com) projects.
 
 **omg.lol subscription expired: 2026-06-06.** All data was exported before expiry and lives in `content/` in this repo. This document tracks what existed, what needs to be rebuilt, and migration progress.
