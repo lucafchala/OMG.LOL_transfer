@@ -6,6 +6,8 @@
 
 # lucafchala — Migration Hub
 
+> Part of the [lucafchala.com ecosystem](https://github.com/lucafchala/lucafchala.com#the-ecosystem). For the live network map, shared design system, and conventions, see the [hub README](https://github.com/lucafchala/lucafchala.com#readme).
+
 This repo is the central reference for migrating **Luca F. Chala's** personal web presence off [omg.lol](https://omg.lol) and onto self-hosted [Cloudflare Pages](https://pages.cloudflare.com) projects.
 
 **omg.lol subscription expired: 2026-06-06.** All data was exported before expiry and lives in `content/` in this repo. This document tracks what existed, what needs to be rebuilt, and migration progress.
@@ -61,6 +63,15 @@ All content was exported from the omg.lol API on 2026-06-05, one day before expi
 
 Each item is one GitHub repo + one Cloudflare Pages project + one DNS update.
 Ordered by priority. **Start a fresh Claude Code session for each one** — read the "How to use" section below first.
+
+> **Scaffolds ready (README + folder structure only — pages NOT yet generated):** the remaining repos have a build-spec README staged in `output/<subdomain>/`, ready to code pages into later:
+> - `output/now.lucafchala.com/` — `/now` page (source: `content/now/now.md`)
+> - `output/weblog.lucafchala.com/` — blog index + `2023/12/…` and `2024/06/…` post folders (sources: `content/weblog/*.md`)
+> - `output/proof.lucafchala.com/` — ownership proof / PGP (standalone page **or** redirect to a paste)
+> - `output/keys.lucafchala.com/` — SSH + PGP public keys *(referenced by the live homepage/`url` hub, but not in the original plan — decide canonical home vs. `proof`/pastes)*
+> - `output/pictures.lucafchala.com/` — **redirect-only** → `fotos.lucafchala.com` (or drop DNS)
+> - `output/tildverse.lucafchala.com/` — **redirect-only** → `lucafchala.com` (or drop DNS)
+> - `output/log.lucafchala.com/` — optional; redirect or a 5-entry static page
 
 ---
 
